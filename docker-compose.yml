@@ -1,0 +1,20 @@
+services:
+  web:
+    build: .
+    container_name: kinetictruth-web
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: kinetictruth-redis
+    ports:
+      - "6379:6379"
