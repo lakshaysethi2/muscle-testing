@@ -9,35 +9,40 @@
     <form method="post" enctype="multipart/form-data" class="bg-white rounded-xl shadow p-6 space-y-5">
         {% csrf_token %}
 
+        {% if form.non_field_errors %}
+        <div class="bg-red-100 text-red-800 p-3 rounded">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
         <div>
-            <label for="bio" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="{{ form.bio.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                 Bio / Intention
             </label>
-            <textarea id="bio" name="bio" rows="3"
-                      class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      placeholder="A few words about yourself...">{{ user.bio }}</textarea>
+            {{ form.bio }}
+            {% if form.bio.errors %}
+            <p class="text-red-600 text-sm mt-1">{{ form.bio.errors.0 }}</p>
+            {% endif %}
         </div>
 
         <div>
-            <label for="testing_method" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="{{ form.testing_method.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                 Preferred Testing Method
             </label>
-            <select id="testing_method" name="testing_method"
-                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                {% for value, label in user.TestingMethod.choices %}
-                <option value="{{ value }}" {% if user.testing_method == value %}selected{% endif %}>
-                    {{ label }}
-                </option>
-                {% endfor %}
-            </select>
+            {{ form.testing_method }}
+            {% if form.testing_method.errors %}
+            <p class="text-red-600 text-sm mt-1">{{ form.testing_method.errors.0 }}</p>
+            {% endif %}
         </div>
 
         <div>
-            <label for="avatar" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="{{ form.avatar.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                 Avatar
             </label>
-            <input type="file" id="avatar" name="avatar" accept="image/*"
-                   class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+            {{ form.avatar }}
+            {% if form.avatar.errors %}
+            <p class="text-red-600 text-sm mt-1">{{ form.avatar.errors.0 }}</p>
+            {% endif %}
         </div>
 
         <button type="submit"

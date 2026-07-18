@@ -56,7 +56,7 @@ task-management files, and a working landing page. Then build features one-by-on
 ## Done ✅
 
 - [x] **F-01: Project Foundation** — Directory structure, Docker, Makefile, Django scaffold, landing page
-- [x] **F-02: Custom User Model** — TestingMethod enum, karma, display_name, profile views + templates, 12 tests
+- [x] **F-02: Custom User Model** — TestingMethod enum, karma, display_name, profile views + templates, 17 tests
 
 ---
 

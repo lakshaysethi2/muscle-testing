@@ -1,3 +1,6 @@
+import os
+import sys
+
 import pytest
 from django.test import Client
 from django.urls import reverse
@@ -41,6 +44,11 @@ class TestUserModel:
     def test_display_name_falls_back_to_username(self):
         user = User.objects.create_user(username="anon", password="testpass123")
         assert user.display_name == "anon"
+
+    def test_calibration_count_returns_zero(self):
+        """calibration_count returns 0 before Calibration model exists."""
+        user = User.objects.create_user(username="nocals", password="testpass123")
+        assert user.calibration_count == 0
 
     def test_get_absolute_url(self):
         user = User.objects.create_user(username="profileuser", password="testpass123")
@@ -112,3 +120,50 @@ class TestProfileViews:
         user.refresh_from_db()
         assert user.bio == "Updated bio text"
         assert user.testing_method == User.TestingMethod.SWAY
+
+    def test_edit_profile_rejects_invalid_method(self):
+        """Invalid testing_method value is rejected by form validation."""
+        user = User.objects.create_user(username="hacker", password="testpass123")
+        client = Client()
+        client.force_login(user)
+        response = client.post(
+            reverse("accounts:edit_profile"),
+            {
+                "bio": "trying injection",
+                "testing_method": "not-a-method",
+            },
+        )
+        # Form is invalid — returns 200 with errors, not a redirect
+        assert response.status_code == 200
+        assert "not-a-method" in response.content.decode()
+        user.refresh_from_db()
+        # Must NOT have changed since form was invalid
+        assert user.testing_method == User.TestingMethod.O_RING
+        assert user.bio == ""
+
+
+def test_prod_settings_require_secret_key():
+    """Production settings must crash if DJANGO_SECRET_KEY is unset."""
+    from django.core.exceptions import ImproperlyConfigured
+    from django.core.management.utils import get_random_secret_key
+
+    saved = os.environ.pop("DJANGO_SECRET_KEY", None)
+
+    # Clear any cached imports of config.settings.prod
+    for key in list(sys.modules):
+        if "config.settings" in key:
+            del sys.modules[key]
+
+    try:
+        with pytest.raises(ImproperlyConfigured):
+            import config.settings.prod  # noqa: F401
+    finally:
+        # Restore
+        if saved:
+            os.environ["DJANGO_SECRET_KEY"] = saved
+        else:
+            os.environ["DJANGO_SECRET_KEY"] = get_random_secret_key()
+        # Clean up cached modules again so other tests aren't affected
+        for key in list(sys.modules):
+            if "config.settings" in key:
+                del sys.modules[key]

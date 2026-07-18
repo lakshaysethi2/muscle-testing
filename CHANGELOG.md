@@ -12,14 +12,15 @@ All notable changes to KineticTruth are documented here.
 - `TestingMethod` TextChoices enum on User: O_RING, FINGER_OVER_FINGER, SWAY, INTERLOCKING_O, PROXY, OTHER
 - `karma` integer field (community trust score)
 - `display_name` property (full_name → email → username)
-- `calibration_count` property (placeholder for calibrations FK)
+- `calibration_count` property (guarded with `hasattr` until Calibration model exists)
 - `get_absolute_url` → `/u/profile/<username>/`
 - Profile view at `/u/profile/<username>/` (public)
-- Edit profile view at `/u/profile/edit/` (login-required)
+- Edit profile view at `/u/profile/edit/` (login-required) — uses `ProfileEditForm` with `ChoiceField` validation
 - Profile & edit_profile templates with Tailwind
 - Admin panel: list_display + search + fieldsets for TestingMethod + karma
 - Navbar: "Profile" link when logged in
-- 12 tests: User model (7), profile views (5)
+- **PR review fixes:** docker-entrypoint.sh for auto-migrate, form validation on testing_method, guarded calibration_count, mandatory SECRET_KEY in prod
+- 17 tests: User model (8), profile views (6), prod settings (1), core (2)
 
 #### F-01 — Project Foundation
 - Project foundation: directory structure, Docker, Makefile, Django scaffold

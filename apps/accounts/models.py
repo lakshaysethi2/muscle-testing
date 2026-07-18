@@ -49,5 +49,11 @@ class User(AbstractUser):
 
     @property
     def calibration_count(self):
-        """Total calibrations submitted by this user."""
-        return self.calibrations.count()  # relates to calibrations.Calibration
+        """Total calibrations submitted by this user.
+
+        Returns 0 until the Calibration model with related_name='calibrations'
+        is added to the calibrations app.
+        """
+        if hasattr(self, "calibrations"):
+            return self.calibrations.count()
+        return 0
