@@ -20,7 +20,6 @@ class ProfileEditForm(forms.Form):
 
     testing_method = forms.ChoiceField(
         choices=User.TestingMethod.choices,
-        required=False,
         widget=forms.Select(
             attrs={
                 "class": "w-full rounded-lg border-gray-300 shadow-sm "

@@ -141,6 +141,23 @@ class TestProfileViews:
         assert user.testing_method == User.TestingMethod.O_RING
         assert user.bio == ""
 
+    def test_edit_profile_rejects_missing_method(self):
+        """Omitting testing_method entirely is rejected (field is required)."""
+        user = User.objects.create_user(username="blanker", password="testpass123")
+        user.bio = "original"
+        user.save()
+        client = Client()
+        client.force_login(user)
+        response = client.post(
+            reverse("accounts:edit_profile"),
+            {"bio": "changed bio"},
+        )
+        assert response.status_code == 200
+        user.refresh_from_db()
+        # DB must be unchanged — form was invalid
+        assert user.bio == "original"
+        assert user.testing_method == User.TestingMethod.O_RING
+
 
 def test_prod_settings_require_secret_key():
     """Production settings must crash if DJANGO_SECRET_KEY is unset."""
