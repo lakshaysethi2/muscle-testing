@@ -1,5 +1,7 @@
 from django.urls import path
 
+from apps.calibrations.views import calibration_detail
+
 from . import views
 
 urlpatterns = [
@@ -28,4 +30,5 @@ urlpatterns = [
         {"feature": "F-13 — Personal Dashboard"},
         name="dashboard",
     ),
+    path("calibrations/<int:pk>/", calibration_detail, name="calibration_detail"),
 ]

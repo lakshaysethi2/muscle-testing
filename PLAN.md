@@ -23,8 +23,8 @@ task-management files, and a working landing page. Then build features one-by-on
 ### Auth & Accounts
 - [x] **F-02: Custom User Model** — Extend AbstractUser, add bio, avatar, testing preferences
 - [x] **F-03: OAuth Integration** — Google, Facebook, Discord, Telegram via django-allauth
-- [ ] **F-04: Guest/Anonymous Mode** — Session-based usage without login
-- [ ] **F-05: User Profile Pages** — Display name, avatar, bio, calibration history
+- [x] **F-04: Guest/Anonymous Mode** — Session-based usage without login
+- [x] **F-05: User Profile Pages** — Display name, avatar, bio, calibration history (built in F-02)
 
 ### Core Muscle Testing
 - [ ] **F-06: Calibration Model** — Subject, result (strong/weak), scale value, method, visibility
