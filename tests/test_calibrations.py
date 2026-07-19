@@ -84,7 +84,7 @@ class TestCalibrationModel:
         cal3 = Calibration(
             subject="Z", result=Calibration.Result.STRONG, calibration_level=500
         )
-        cal3.full_clean()  # should not raise
+        cal3.full_clean()
 
     def test_is_public_false_for_private(self):
         cal = Calibration.objects.create(
@@ -214,7 +214,7 @@ class TestCalibrationAPI:
         assert data["calibration_level"] == 450
         assert data["submitter_name"] == "API Tester"
 
-    def test_calibration_detail_api(self):
+    def test_calibration_detail_api_public(self):
         cal = Calibration.objects.create(
             subject="Detail test",
             result=Calibration.Result.WEAK,
@@ -225,6 +225,63 @@ class TestCalibrationAPI:
         response = client.get(reverse("calibrations:api_detail", kwargs={"pk": cal.pk}))
         assert response.status_code == 200
         assert response.json()["subject"] == "Detail test"
+
+    # ── Privacy: detail API must not leak private / removed records ──
+
+    def test_anon_cannot_get_private_via_api(self):
+        cal = Calibration.objects.create(
+            subject="My secret",
+            result=Calibration.Result.STRONG,
+            visibility=Calibration.Visibility.PRIVATE,
+        )
+        client = Client()
+        response = client.get(reverse("calibrations:api_detail", kwargs={"pk": cal.pk}))
+        assert response.status_code == 404
+
+    def test_anon_cannot_get_removed_via_api(self):
+        cal = Calibration.objects.create(
+            subject="Deleted entry",
+            result=Calibration.Result.STRONG,
+            visibility=Calibration.Visibility.PUBLIC,
+            is_removed=True,
+        )
+        client = Client()
+        response = client.get(reverse("calibrations:api_detail", kwargs={"pk": cal.pk}))
+        assert response.status_code == 404
+
+    def test_user_cannot_get_other_private_via_api(self):
+        owner = User.objects.create_user(
+            username="owner", email="owner@x.com", password="p"
+        )
+        User.objects.create_user(
+            username="stranger", email="stranger@x.com", password="p"
+        )
+        cal = Calibration.objects.create(
+            user=owner,
+            subject="Owner's private",
+            result=Calibration.Result.STRONG,
+            visibility=Calibration.Visibility.PRIVATE,
+        )
+        client = Client()
+        client.login(username="stranger@x.com", password="p")
+        response = client.get(reverse("calibrations:api_detail", kwargs={"pk": cal.pk}))
+        assert response.status_code == 404
+
+    def test_owner_can_get_own_private_via_api(self):
+        owner = User.objects.create_user(
+            username="self", email="self@x.com", password="p"
+        )
+        cal = Calibration.objects.create(
+            user=owner,
+            subject="My private note",
+            result=Calibration.Result.STRONG,
+            visibility=Calibration.Visibility.PRIVATE,
+        )
+        client = Client()
+        client.login(username="self@x.com", password="p")
+        response = client.get(reverse("calibrations:api_detail", kwargs={"pk": cal.pk}))
+        assert response.status_code == 200
+        assert "My private note" in response.json()["subject"]
 
 
 @pytest.mark.django_db

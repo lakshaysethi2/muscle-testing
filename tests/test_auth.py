@@ -149,7 +149,6 @@ class TestLogoutView:
         assert "_auth_user_id" in client.session
 
         response = client.get(reverse("account_logout"))
-        # GET logout redirects to home (ACCOUNT_LOGOUT_ON_GET=True)
         assert response.status_code == 302
         assert response.url == "/"
 
@@ -159,12 +158,16 @@ class TestSocialProvidersContext:
     """Test the social_providers context processor."""
 
     def test_no_providers_shows_empty_list(self):
-        """Without SocialApp entries, socialaccount_providers is empty."""
         client = Client()
         response = client.get(reverse("account_login"))
-        # Template should still render without errors
         assert response.status_code == 200
-        # Social buttons area should not contain provider names
         content = response.content.decode()
-        # The divider "or with email" should NOT appear when no providers
         assert "or with email" not in content
+
+
+def test_dev_settings_have_permissive_auth():
+    """Dev settings enable instant logout and skip email verification."""
+    from django.conf import settings
+
+    assert settings.ACCOUNT_LOGOUT_ON_GET is True
+    assert settings.ACCOUNT_EMAIL_VERIFICATION == "none"

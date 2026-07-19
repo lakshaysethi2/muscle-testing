@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
 from rest_framework import generics, permissions
 
@@ -17,7 +18,6 @@ class CalibrationListCreateAPI(generics.ListCreateAPIView):
         qs = Calibration.objects.filter(
             visibility=Calibration.Visibility.PUBLIC, is_removed=False
         )
-        # Filters
         category = self.request.query_params.get("category")
         if category:
             qs = qs.filter(category=category)
@@ -28,19 +28,30 @@ class CalibrationListCreateAPI(generics.ListCreateAPIView):
 
 
 class CalibrationDetailAPI(generics.RetrieveUpdateDestroyAPIView):
-    """Retrieve, update, or delete a single calibration."""
+    """Retrieve, update, or delete a single calibration.
+
+    - Anonymous users: only public, non-removed records.
+    - Authenticated users: public non-removed + their own records.
+    - Writes (PUT/PATCH/DELETE): owner only.
+    """
 
     serializer_class = CalibrationSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        return Calibration.objects.all().select_related("user")
+        qs = Calibration.objects.filter(is_removed=False)
+        if self.request.user.is_authenticated:
+            qs = qs.filter(
+                Q(visibility=Calibration.Visibility.PUBLIC) | Q(user=self.request.user)
+            )
+        else:
+            qs = qs.filter(visibility=Calibration.Visibility.PUBLIC)
+        return qs.select_related("user")
 
     def get_object(self):
         obj = super().get_object()
-        # Only the owner can update/delete
         if self.request.method in ("PUT", "PATCH", "DELETE"):
-            if obj.user != self.request.user:
+            if not self.request.user.is_authenticated or obj.user != self.request.user:
                 self.permission_denied(self.request)
         return obj
 
