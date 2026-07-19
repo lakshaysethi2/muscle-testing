@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-All notable changes to KineticTruth are documented here.
+All notable changes to TruthCheck are documented here.
 
 ---
 

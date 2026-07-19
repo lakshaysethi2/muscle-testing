@@ -1,7 +1,7 @@
 services:
   web:
     build: .
-    container_name: kinetictruth-web
+    container_name: truthcheck-web
     ports:
       - "8000:8000"
     env_file:
@@ -14,6 +14,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: kinetictruth-redis
+    container_name: truthcheck-redis
     ports:
       - "6379:6379"

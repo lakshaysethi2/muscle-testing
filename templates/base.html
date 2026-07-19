@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}KineticTruth{% endblock %}</title>
+    <title>{% block title %}TruthCheck{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/htmx.org@1.9.x/dist/htmx.min.js"></script>
@@ -11,7 +11,7 @@
 <body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
     <header class="bg-white shadow-sm border-b">
         <nav class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/" class="text-xl font-bold text-indigo-600">KineticTruth</a>
+            <a href="/" class="text-xl font-bold text-indigo-600">TruthCheck</a>
             <div class="flex items-center gap-4">
                 <a href="{% url 'start_testing' %}" class="text-sm text-gray-600 hover:text-gray-900">Test</a>
                 <a href="{% url 'community_db' %}" class="text-sm text-gray-600 hover:text-gray-900">Community</a>

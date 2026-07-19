@@ -1,4 +1,4 @@
-# KineticTruth
+# TruthCheck
 
 A community-driven muscle testing platform inspired by the teachings of Dr. David R. Hawkins (Power vs. Force, The Map of Consciousness).
 

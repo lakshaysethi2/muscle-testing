@@ -4,7 +4,7 @@ from django.urls import reverse
 
 
 class User(AbstractUser):
-    """Custom User model for KineticTruth.
+    """Custom User model for TruthCheck.
 
     Fields beyond AbstractUser:
     - bio: user's self-description / intention

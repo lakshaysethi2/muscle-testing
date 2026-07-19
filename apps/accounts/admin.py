@@ -18,5 +18,5 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ("testing_method", "is_staff", "is_superuser", "date_joined")
     search_fields = ("username", "email", "first_name", "last_name", "bio")
     fieldsets = BaseUserAdmin.fieldsets + (
-        ("KineticTruth Profile", {"fields": ("bio", "testing_method", "karma")}),
+        ("TruthCheck Profile", {"fields": ("bio", "testing_method", "karma")}),
     )

@@ -9,7 +9,7 @@ def test_homepage_returns_200():
     client = Client()
     response = client.get("/")
     assert response.status_code == 200
-    assert "KineticTruth" in response.content.decode()
+    assert "TruthCheck" in response.content.decode()
 
 
 @pytest.mark.django_db
