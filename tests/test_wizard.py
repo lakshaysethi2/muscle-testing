@@ -28,9 +28,10 @@ class TestWizardFlow:
         """Step 1 shows preparation checklist."""
         client = Client()
         content = self._get_step(client, "Before You Begin")
-        assert "Hydration" in content
+        assert "Thymic Thump" in content
+        assert "Quiet Environment" in content
         assert "Emotional Neutrality" in content
-        assert "Centering Exercise" in content
+        assert "Prayer as Mudra" in content
 
     def test_step2_method_selection(self):
         """Step 2 shows method selection with instructions."""
@@ -40,6 +41,8 @@ class TestWizardFlow:
         assert "O-Ring" in content
         assert "Finger-over-Finger" in content
         assert "Sway" in content
+        # O-ring should be described as solo
+        assert "Solo method" in content
 
     def test_step3_test_form(self):
         """Step 3 shows the test entry form."""
