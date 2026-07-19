@@ -1,17 +1,33 @@
 """Guided muscle testing wizard — multi-step interactive flow.
 
-Step 1: Preparation checklist (hydration, neutrality, centering)
+Step 1: Preparation (thymic thump, quiet environment, neutrality, mudra)
 Step 2: Method selection with instructions
 Step 3: Enter subject + record result + optional calibration level
 Step 4: Result summary + save to database
+
+Supports back/forward navigation. State stored in session.
 """
 
+from django import forms
 from django.shortcuts import redirect, render
 
 from apps.accounts.models import User
 from apps.calibrations.models import Calibration
 
 STEPS = ["prepare", "method", "test", "result"]
+
+# Step index lookup for back/forward navigation
+_STEP_ORDER = {name: i for i, name in enumerate(STEPS)}
+
+
+class TestForm(forms.Form):
+    """Validates the test-step input before saving."""
+
+    subject = forms.CharField(min_length=1, max_length=300)
+    result = forms.ChoiceField(choices=Calibration.Result.choices)
+    calibration_level = forms.IntegerField(required=False, min_value=1, max_value=1000)
+    notes = forms.CharField(required=False, max_length=2000)
+    visibility = forms.ChoiceField(choices=Calibration.Visibility.choices)
 
 
 def _get_wizard_state(request):
@@ -27,11 +43,17 @@ def _clear_wizard_state(request):
     request.session.modified = True
 
 
+def _mark_session_dirty(request):
+    """Ensure Django persists the session mutation."""
+    request.session.modified = True
+
+
 def guided_test(request):
     """Multi-step muscle testing wizard.
 
     GET:  renders the current step template.
-    POST: advances to the next step, saving data in session.
+    POST: advances / goes back, saving data in session.
+          A 'back' parameter moves to the previous step.
     """
     state = _get_wizard_state(request)
     current = state.get("step", "prepare")
@@ -39,15 +61,24 @@ def guided_test(request):
     if request.method == "POST":
         return _handle_post(request, state, current)
 
+    # GET — clear one-shot error and render
+    state.pop("error", None)
+    _mark_session_dirty(request)
     return _render_step(request, current, state)
 
 
 def _handle_post(request, state, current):
-    """Process a wizard step submission and advance."""
-    request.session.modified = True
+    """Process a wizard step submission."""
+    _mark_session_dirty(request)
 
+    # ── Back navigation ──
+    if request.POST.get("action") == "back":
+        idx = _STEP_ORDER.get(current, 0)
+        state["step"] = STEPS[max(0, idx - 1)]
+        return redirect("start_testing")
+
+    # ── Step handlers ──
     if current == "prepare":
-        # User confirms they are ready
         state["step"] = "method"
 
     elif current == "method":
@@ -55,44 +86,42 @@ def _handle_post(request, state, current):
         if method in dict(User.TestingMethod.choices):
             state["method"] = method
             state["step"] = "test"
-        else:
-            state["step"] = "method"  # stay, show error
+        # else: stay on method page (invalid selection)
 
     elif current == "test":
-        subject = request.POST.get("subject", "").strip()
-        result = request.POST.get("result", "")
-        level_raw = request.POST.get("calibration_level", "")
-        notes = request.POST.get("notes", "").strip()
-        visibility_raw = request.POST.get("visibility", "private")
-
-        if not subject or result not in ("strong", "weak"):
-            state["error"] = "Please enter a subject and select Strong or Weak."
+        form = TestForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            calibration = Calibration.objects.create(
+                user=request.user if request.user.is_authenticated else None,
+                subject=data["subject"],
+                result=data["result"],
+                calibration_level=data["calibration_level"],
+                method=state.get("method", User.TestingMethod.O_RING),
+                notes=data.get("notes", ""),
+                visibility=data["visibility"],
+            )
+            state["saved_pk"] = calibration.pk
+            state.pop("error", None)
+            state["step"] = "result"
+        else:
+            state["error"] = _format_form_errors(form)
             state["step"] = "test"
             return redirect("start_testing")
-
-        # Save calibration
-        calibration = Calibration.objects.create(
-            user=request.user if request.user.is_authenticated else None,
-            subject=subject,
-            result=result,
-            calibration_level=_safe_int(level_raw),
-            method=state.get("method", User.TestingMethod.O_RING),
-            notes=notes,
-            visibility=(
-                Calibration.Visibility.PUBLIC
-                if visibility_raw == "public"
-                else Calibration.Visibility.PRIVATE
-            ),
-        )
-        state["saved_pk"] = calibration.pk
-        state["step"] = "result"
 
     elif current == "result":
         _clear_wizard_state(request)
         return redirect("start_testing")
 
-    request.session.modified = True
     return redirect("start_testing")
+
+
+def _format_form_errors(form):
+    """Return the first human-readable error from a form."""
+    for field, errors in form.errors.items():
+        for err in errors:
+            return f"{field}: {err}" if field != "__all__" else err
+    return "Please fix the errors below."
 
 
 def _render_step(request, step, state):
@@ -104,7 +133,11 @@ def _render_step(request, step, state):
 
 def _build_context(step, state):
     """Build template context for the current step."""
-    ctx = {"step": step, "steps": STEPS}
+    ctx = {
+        "step": step,
+        "steps": STEPS,
+        "can_go_back": _STEP_ORDER.get(step, 0) > 0,
+    }
 
     if step == "method":
         ctx["methods"] = User.TestingMethod.choices
@@ -112,10 +145,7 @@ def _build_context(step, state):
 
     if step == "test":
         ctx["method"] = state.get("method", User.TestingMethod.O_RING)
-        error = state.get("error", "")
-        if error:
-            ctx["error"] = error
-            state.pop("error", None)  # clear after rendering once
+        ctx["error"] = state.get("error", "")
 
     if step == "result":
         pk = state.get("saved_pk")
@@ -126,14 +156,3 @@ def _build_context(step, state):
                 pass
 
     return ctx
-
-
-def _safe_int(value):
-    """Return an int or None, silently ignoring bad values."""
-    try:
-        v = int(value)
-        if 1 <= v <= 1000:
-            return v
-    except (ValueError, TypeError):
-        pass
-    return None

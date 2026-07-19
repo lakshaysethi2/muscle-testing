@@ -61,10 +61,16 @@
         </label>
         {% endfor %}
 
-        <button type="submit"
-                class="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium text-lg mt-6">
-            Continue to Test →
-        </button>
+        <div class="flex gap-3 mt-6">
+            <button type="submit" name="action" value="back"
+                    class="flex-1 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-lg">
+                ← Back
+            </button>
+            <button type="submit"
+                    class="flex-1 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium text-lg">
+                Continue to Test →
+            </button>
+        </div>
     </form>
 </div>
 

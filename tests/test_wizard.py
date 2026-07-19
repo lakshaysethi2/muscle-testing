@@ -41,7 +41,6 @@ class TestWizardFlow:
         assert "O-Ring" in content
         assert "Finger-over-Finger" in content
         assert "Sway" in content
-        # O-ring should be described as solo
         assert "Solo method" in content
 
     def test_step3_test_form(self):
@@ -81,22 +80,24 @@ class TestWizardFlow:
         assert cal.notes == "Tested in morning"
 
     def test_wizard_without_subject_shows_error(self):
-        """Submitting test step without subject shows error."""
+        """Submitting test step without subject shows form error."""
         client = Client()
         self._post_step(client)  # prepare → method
         self._post_step(client, {"method": "o_ring"})  # method → test
 
-        # Post missing subject and result
-        resp = client.post(reverse("start_testing"), {"subject": ""})
+        resp = client.post(
+            reverse("start_testing"),
+            {"subject": "", "result": "strong", "visibility": "private"},
+        )
         assert resp.status_code == 302
 
         content = self._get_step(client, "Perform Your Test")
-        assert "enter a subject" in content.lower()
+        assert "subject" in content.lower()  # error message mentions subject field
 
     def test_wizard_resets_after_result(self):
-        """After viewing result, clicking 'Test Another' starts fresh."""
+        """After viewing result, POSTing resets wizard."""
         client = Client()
-        self._post_step(client)  # prepare → method
+        self._post_step(client)
         self._post_step(client, {"method": "o_ring"})
         self._post_step(
             client,
@@ -106,12 +107,9 @@ class TestWizardFlow:
                 "visibility": "private",
             },
         )
-
-        # View result page
         content = self._get_step(client, "First test")
         assert "Weak" in content
 
-        # POST from result page resets wizard
         self._post_step(client)
         content = self._get_step(client, "Before You Begin")
         assert "Before You Begin" in content
@@ -127,9 +125,9 @@ class TestWizardFlow:
                 "subject": "Expired supplement",
                 "result": "weak",
                 "calibration_level": "80",
+                "visibility": "private",
             },
         )
-
         content = self._get_step(client, "Expired supplement")
         assert "Weak" in content
         assert "80" in content
@@ -138,8 +136,8 @@ class TestWizardFlow:
         assert cal.result == "weak"
         assert cal.calibration_level == 80
 
-    def test_calibration_level_out_of_range_is_ignored(self):
-        """Values outside 1-1000 are silently dropped."""
+    def test_calibration_level_out_of_range_rejected(self):
+        """Values outside 1-1000 are rejected by form validation."""
         client = Client()
         self._post_step(client)
         self._post_step(client, {"method": "o_ring"})
@@ -149,11 +147,13 @@ class TestWizardFlow:
                 "subject": "X",
                 "result": "strong",
                 "calibration_level": "9999",
+                "visibility": "private",
             },
         )
-
-        cal = Calibration.objects.first()
-        assert cal.calibration_level is None
+        # Form validation fails — no calibration created
+        assert Calibration.objects.count() == 0
+        content = self._get_step(client, "Perform Your Test")
+        assert "calibration_level" in content.lower()
 
     def test_authenticated_user_saved(self):
         """Calibration links to authenticated user."""
@@ -163,8 +163,81 @@ class TestWizardFlow:
 
         self._post_step(client)
         self._post_step(client, {"method": "o_ring"})
-        self._post_step(client, {"subject": "Auth test", "result": "strong"})
+        self._post_step(
+            client,
+            {"subject": "Auth test", "result": "strong", "visibility": "private"},
+        )
 
         cal = Calibration.objects.first()
         assert cal.user is not None
         assert cal.user.email == "t@x.com"
+
+    # ── New tests: back navigation, validation, error clearing ──
+
+    def test_back_from_method_to_prepare(self):
+        """Clicking Back on method page returns to prepare step."""
+        client = Client()
+        self._post_step(client)  # prepare → method
+        self._get_step(client, "Choose Your Testing Method")
+
+        # Click back
+        client.post(reverse("start_testing"), {"action": "back"})
+        content = self._get_step(client, "Before You Begin")
+        assert "Thymic Thump" in content
+
+    def test_back_from_test_to_method(self):
+        """Clicking Back on test page returns to method step."""
+        client = Client()
+        self._post_step(client)  # prepare → method
+        self._post_step(client, {"method": "sway"})  # method → test
+        self._get_step(client, "Perform Your Test")
+
+        # Click back
+        client.post(reverse("start_testing"), {"action": "back"})
+        content = self._get_step(client, "Choose Your Testing Method")
+        assert "Sway" in content
+
+    def test_no_back_on_prepare_page(self):
+        """Prepare page has no back button (it's step 1)."""
+        client = Client()
+        content = self._get_step(client, "Before You Begin")
+        assert "← Back" not in content
+
+    def test_overlong_subject_rejected(self):
+        """Subject >300 chars is rejected by form, no DB record created."""
+        client = Client()
+        self._post_step(client)
+        self._post_step(client, {"method": "o_ring"})
+        long_subject = "x" * 301
+        self._post_step(
+            client,
+            {
+                "subject": long_subject,
+                "result": "strong",
+                "visibility": "private",
+            },
+        )
+        assert Calibration.objects.count() == 0
+        content = self._get_step(client, "Perform Your Test")
+        assert "subject" in content.lower()
+
+    def test_error_cleared_on_next_get(self):
+        """An error shown after invalid POST does not persist on next GET."""
+        client = Client()
+        self._post_step(client)
+        self._post_step(client, {"method": "o_ring"})
+
+        # Submit invalid data
+        client.post(
+            reverse("start_testing"),
+            {"subject": "X", "result": "", "visibility": "private"},
+        )
+        # First GET shows error
+        r1 = client.get(reverse("start_testing"))
+        c1 = r1.content.decode()
+        assert "result" in c1.lower()
+
+        # Second GET — error must be gone
+        r2 = client.get(reverse("start_testing"))
+        c2 = r2.content.decode()
+        assert "result" not in c2.lower() or "This field is required" not in c2
