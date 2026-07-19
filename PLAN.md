@@ -11,7 +11,7 @@ task-management files, and a working landing page. Then build features one-by-on
 
 > _(Agent: move the task you're working on here before starting)_
 
-- [ ] **F-03: OAuth Integration** — Google, Facebook, Discord, Telegram via django-allauth
+- [ ] **F-04: Guest/Anonymous Mode** — Session-based usage without login
 
 ---
 
@@ -22,7 +22,7 @@ task-management files, and a working landing page. Then build features one-by-on
 
 ### Auth & Accounts
 - [x] **F-02: Custom User Model** — Extend AbstractUser, add bio, avatar, testing preferences
-- [ ] **F-03: OAuth Integration** — Google, Facebook, Discord, Telegram via django-allauth
+- [x] **F-03: OAuth Integration** — Google, Facebook, Discord, Telegram via django-allauth
 - [ ] **F-04: Guest/Anonymous Mode** — Session-based usage without login
 - [ ] **F-05: User Profile Pages** — Display name, avatar, bio, calibration history
 
@@ -56,6 +56,7 @@ task-management files, and a working landing page. Then build features one-by-on
 ## Done ✅
 
 - [x] **F-01: Project Foundation** — Directory structure, Docker, Makefile, Django scaffold, landing page
+- [x] **F-03: OAuth Integration** — Google, Facebook, Discord, Telegram via django-allauth, styled login/signup/logout, social_providers context processor, 35 tests
 - [x] **F-02: Custom User Model** — TestingMethod enum, karma, display_name, profile views + templates, 17 tests
 
 ---

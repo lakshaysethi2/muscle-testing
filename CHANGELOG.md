@@ -6,6 +6,18 @@ All notable changes to TruthCheck are documented here.
 
 ## [Unreleased]
 
+### Added (Session: 2026-07-19)
+
+#### F-03 — OAuth Integration
+- Styled allauth templates: login (social buttons + email/password), signup, logout
+- Custom `social_providers` context processor — social buttons only shown when providers configured in Django admin
+- Google, Facebook, Discord SVG icons inline on login page
+- ACCOUNT_LOGOUT_ON_GET=True for simple sign-out flow
+- ACCOUNT_EMAIL_VERIFICATION=none for dev convenience
+- No new .env vars — social providers configured via Django admin (allauth SocialApp)
+- 13 auth tests: login (4), signup (6), logout (2), context processor (1)
+- Total test suite: 35 tests
+
 ### Added (Session: 2026-07-18)
 
 #### F-02 — Custom User Model
