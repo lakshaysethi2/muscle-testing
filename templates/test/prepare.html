@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Prepare — TruthCheck{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+
+{# Step indicator #}
+<div class="flex items-center gap-2 mb-8 text-sm text-gray-400">
+    {% for s in steps %}
+    <span class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2
+        {% if s == step %}border-indigo-500 bg-indigo-500 text-white{% else %}border-gray-200 text-gray-400{% endif %}">
+        {{ forloop.counter }}
+    </span>
+    <span class="capitalize">{{ s }}</span>
+    {% if not forloop.last %}<span class="flex-1 h-0.5 bg-gray-200"></span>{% endif %}
+    {% endfor %}
+</div>
+
+<div class="bg-white rounded-xl shadow p-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">Before You Begin</h1>
+    <p class="text-gray-600 mb-6">
+        Proper preparation is essential for accurate muscle testing,
+        as taught by Dr. David R. Hawkins. Please review each item:
+    </p>
+
+    <div class="space-y-4">
+        <div class="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
+            <span class="text-2xl">🫀</span>
+            <div>
+                <h3 class="font-semibold text-gray-900">Thymic Thump</h3>
+                <p class="text-sm text-gray-600">
+                    Thump your upper breastbone firmly three times with your
+                    fingertips, while smiling and thinking of something or
+                    someone you love. This clears energetic imbalances in the
+                    thymus meridian and resets your system for accurate testing.
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
+            <span class="text-2xl">🔇</span>
+            <div>
+                <h3 class="font-semibold text-gray-900">Quiet Environment</h3>
+                <p class="text-sm text-gray-600">
+                    Turn off background music, TV, podcasts, and notifications.
+                    Find a quiet space. External noise and distraction interfere
+                    with the subtle muscle response. Even a phone screen nearby
+                    can throw off results.
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
+            <span class="text-2xl">🧘</span>
+            <div>
+                <h3 class="font-semibold text-gray-900">Emotional Neutrality</h3>
+                <p class="text-sm text-gray-600">
+                    Take a few deep breaths. Release strong emotional charges.
+                    The test responds to truth, not preference — let go of
+                    attachment to outcomes.
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
+            <span class="text-2xl">🙏</span>
+            <div>
+                <h3 class="font-semibold text-gray-900">Prayer as Mudra</h3>
+                <p class="text-sm text-gray-600">
+                    Bring your palms together at heart center in Anjali Mudra
+                    (prayer position). Close your eyes, take three slow deep
+                    breaths, and state silently with intention:
+                    <em>"I am open to truth, whatever it may be."</em>
+                    This hand position aligns body and mind for honest inquiry.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" class="mt-8">
+        {% csrf_token %}
+        <button type="submit"
+                class="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium text-lg">
+            I'm Ready — Choose Method →
+        </button>
+    </form>
+</div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="text-center py-20">
+    <h1 class="text-4xl font-bold text-gray-900 mb-4">TruthCheck</h1>
+    <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+        A community-driven muscle testing platform inspired by the teachings of
+        Dr. David R. Hawkins. Explore the Map of Consciousness, practice
+        kinesiological testing, and contribute to a shared database of calibrations.
+    </p>
+    <div class="flex gap-4 justify-center">
+        <a href="{% url 'start_testing' %}" class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+            Start Testing
+        </a>
+        <a href="{% url 'community_db' %}" class="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+            Community DB
+        </a>
+    </div>
+</div>
+{% endblock %}
