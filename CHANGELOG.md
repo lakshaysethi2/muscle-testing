@@ -20,7 +20,10 @@ All notable changes to KineticTruth are documented here.
 - Admin panel: list_display + search + fieldsets for TestingMethod + karma
 - Navbar: "Profile" link when logged in
 - **PR review fixes:** docker-entrypoint.sh for auto-migrate, form validation on testing_method, guarded calibration_count, mandatory SECRET_KEY in prod
-- 17 tests: User model (8), profile views (6), prod settings (1), core (2)
+- **UX fix:** Coming-soon placeholder pages at /test/, /community/, /practice/, /dashboard/ with "🚧 Coming Soon" + feature code
+- Homepage "Start Testing" and "Community DB" buttons now link to real URLs (no more dead `href="#"`)
+- Navbar: "Test" and "Community" links
+- 22 tests: User model (8), profile views (7), core (6), prod settings (1)
 
 #### F-01 — Project Foundation
 - Project foundation: directory structure, Docker, Makefile, Django scaffold

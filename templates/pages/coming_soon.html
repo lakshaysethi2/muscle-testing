@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto text-center py-20">
+    <div class="text-5xl mb-4">🚧</div>
+    <h1 class="text-2xl font-bold text-gray-900 mb-2">Coming Soon</h1>
+
+    {% if feature %}
+    <p class="text-indigo-600 font-medium mb-4">{{ feature }}</p>
+    {% endif %}
+
+    <p class="text-gray-600 mb-8">
+        This feature hasn't been built yet. Check
+        <a href="https://github.com/lakshaysethi2/muscle-testing/blob/arena/019f778d-muscle-testing/PLAN.md"
+           class="text-indigo-600 underline">PLAN.md</a>
+        for the current build queue.
+    </p>
+
+    <a href="{% url 'home' %}" class="text-indigo-600 hover:text-indigo-800">
+        ← Back to Home
+    </a>
+</div>
+{% endblock %}
