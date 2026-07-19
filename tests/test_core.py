@@ -25,12 +25,12 @@ def test_homepage_has_disclaimer():
 class TestComingSoon:
     """Placeholder pages for unbuilt features."""
 
-    def test_start_testing_coming_soon(self):
+    def test_start_testing_now_shows_wizard(self):
+        """The /test/ page is now the live wizard, not coming-soon."""
         client = Client()
         response = client.get(reverse("start_testing"))
         assert response.status_code == 200
-        assert "Coming Soon" in response.content.decode()
-        assert "F-06" in response.content.decode()
+        assert "Before You Begin" in response.content.decode()
 
     def test_community_db_coming_soon(self):
         client = Client()

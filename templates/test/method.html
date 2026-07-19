@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Choose Method — TruthCheck{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+
+<div class="flex items-center gap-2 mb-8 text-sm text-gray-400">
+    {% for s in steps %}
+    <span class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2
+        {% if s == step %}border-indigo-500 bg-indigo-500 text-white{% else %}{% if forloop.counter < 2 %}border-indigo-500 bg-indigo-500 text-white{% else %}border-gray-200 text-gray-400{% endif %}{% endif %}">
+        {{ forloop.counter }}
+    </span>
+    <span class="capitalize">{{ s }}</span>
+    {% if not forloop.last %}<span class="flex-1 h-0.5 bg-gray-200"></span>{% endif %}
+    {% endfor %}
+</div>
+
+<div class="bg-white rounded-xl shadow p-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">Choose Your Testing Method</h1>
+
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+
+        {% for value, label in methods %}
+        <label class="block p-4 border-2 rounded-lg cursor-pointer hover:border-indigo-300 transition
+            {% if value == selected_method %}border-indigo-500 bg-indigo-50{% else %}border-gray-200{% endif %}">
+            <input type="radio" name="method" value="{{ value }}"
+                   class="sr-only" {% if value == selected_method %}checked{% endif %}>
+            <div class="flex items-start gap-3">
+                <div class="w-5 h-5 rounded-full border-2 mt-0.5 flex-shrink-0
+                    {% if value == selected_method %}border-indigo-500 bg-indigo-500{% else %}border-gray-300{% endif %}">
+                    {% if value == selected_method %}
+                    <div class="w-2.5 h-2.5 bg-white rounded-full m-0.5"></div>
+                    {% endif %}
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900">{{ label }}</h3>
+                    <p class="text-sm text-gray-500 mt-0.5">
+                        {% if value == "o_ring" %}
+                        Most reliable method per Hawkins. Partner forms O-ring with thumb and
+                        index finger. You press gently to separate while stating the subject.
+                        Strong = ring holds; Weak = ring breaks.
+                        {% elif value == "finger_over_finger" %}
+                        Solo method. Place middle finger over index finger. State the subject,
+                        then press down. Strong = fingers hold; Weak = fingers slide apart.
+                        {% elif value == "sway" %}
+                        Stand relaxed, feet shoulder-width. State the subject aloud.
+                        Sway forward = Strong/True; Sway backward = Weak/False.
+                        {% elif value == "interlocking_o" %}
+                        Solo. Form two interlocking O-rings with your hands. Pull gently apart
+                        while stating the subject. Rings hold = Strong; rings separate = Weak.
+                        {% elif value == "proxy" %}
+                        Test through a surrogate (another person). Used when the subject
+                        cannot be tested directly.
+                        {% else %}
+                        Any other muscle-testing variation you are familiar with.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </label>
+        {% endfor %}
+
+        <button type="submit"
+                class="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium text-lg mt-6">
+            Continue to Test →
+        </button>
+    </form>
+</div>
+
+</div>
+{% endblock %}

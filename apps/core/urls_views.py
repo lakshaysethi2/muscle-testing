@@ -2,16 +2,11 @@ from django.urls import path
 
 from apps.calibrations.views import calibration_detail
 
-from . import views
+from . import views, wizard
 
 urlpatterns = [
     path("", views.home, name="home"),
-    path(
-        "test/",
-        views.coming_soon,
-        {"feature": "F-06 — Calibration Model"},
-        name="start_testing",
-    ),
+    path("test/", wizard.guided_test, name="start_testing"),
     path(
         "community/",
         views.coming_soon,
